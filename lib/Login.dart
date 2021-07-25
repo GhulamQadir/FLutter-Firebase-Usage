@@ -10,10 +10,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController =
-        TextEditingController(text: "GhulamQadirSakaria25@gmail.com");
-    final TextEditingController passwordController =
-        TextEditingController(text: "Sakaria</>2125");
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
 
     void login() async {
       FirebaseAuth auth = FirebaseAuth.instance;
