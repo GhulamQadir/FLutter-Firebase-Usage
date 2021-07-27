@@ -10,10 +10,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailController =
-        TextEditingController(text: "GhulamQadirSakaria25@gmail.com");
-    final TextEditingController passwordController =
-        TextEditingController(text: "Sakaria</>2125");
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+    bool _validate = false;
 
     void login() async {
       FirebaseAuth auth = FirebaseAuth.instance;
@@ -30,10 +29,21 @@ class _LoginState extends State<Login> {
             await db.collection("users").doc(user.user.uid).get();
         final data = snapshot.data();
 
+        emailController.clear();
+        passwordController.clear();
+
         Navigator.of(context).pushNamed("/home");
+
         print("User is logged in");
       } catch (e) {
-        print("Error occured");
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: Text("Error: ${e.message}"),
+              );
+            });
+        // print(e.message);
       }
     }
 
@@ -84,6 +94,7 @@ class _LoginState extends State<Login> {
                   width: 250,
                   child: TextField(
                     controller: passwordController,
+                    obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Enter password',
                       fillColor: Colors.white,
