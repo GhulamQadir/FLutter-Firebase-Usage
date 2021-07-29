@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutterfirebase/post.dart';
+// import 'package:flutterfirebase/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class Home extends StatefulWidget {
   @override
@@ -9,25 +13,45 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController titleCOntroller = TextEditingController();
+  TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+
+  String imagePath;
+
   Stream postStream =
-      FirebaseFirestore.instance.collection('users').snapshots();
+      FirebaseFirestore.instance.collection('posts').snapshots();
 
   @override
   Widget build(BuildContext context) {
-    void pickimage() async {
+    void pickImage() async {
       final ImagePicker _picker = ImagePicker();
       final image = await _picker.getImage(source: ImageSource.gallery);
-      print(image.openRead());
+      setState(() {
+        imagePath = image.path;
+      });
+      print(imagePath);
     }
 
-    void submit() {
-      String title = titleCOntroller.text;
-      String description = descriptionController.text;
+    void submit() async {
+      try {
+        String title = titleController.text;
+        String description = descriptionController.text;
+        firebase_storage.Reference ref =
+            firebase_storage.FirebaseStorage.instance.ref('/');
 
-      print("Title is: $title");
-      print("Description is: $description");
+        File file = File(imagePath);
+        await ref.putFile(file);
+        String donwnloadUrl = await ref.getDownloadURL();
+        FirebaseFirestore db = FirebaseFirestore.instance;
+        await db.collection("posts").add({
+          "title": title,
+          "description": description,
+          "url": donwnloadUrl,
+        });
+        print("Post uploaded successfully");
+      } catch (e) {
+        print(e.message);
+      }
     }
 
     return MaterialApp(
@@ -38,7 +62,7 @@ class _HomeState extends State<Home> {
             children: [
               Container(
                 child: TextFormField(
-                  controller: titleCOntroller,
+                  controller: titleController,
                   decoration: InputDecoration(
                       contentPadding: EdgeInsets.all(10.0),
                       border: UnderlineInputBorder(),
@@ -55,7 +79,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               ElevatedButton(
-                  onPressed: pickimage, child: Text("Pick an image")),
+                  onPressed: pickImage, child: Text("Pick an image")),
               ElevatedButton(onPressed: submit, child: Text("Submit post")),
               Container(
                 child: StreamBuilder<QuerySnapshot>(
@@ -83,7 +107,7 @@ class _HomeState extends State<Home> {
                                         color: Colors.black, width: 2)),
                                 child: Column(
                                   children: <Widget>[
-                                    Text("Owner: ${data["username"]}"),
+                                    // Text("Owner: ${data["username"]}"),
                                     Image.network(
                                       data["url"],
                                       height: 150,

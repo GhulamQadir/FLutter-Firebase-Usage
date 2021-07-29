@@ -12,7 +12,6 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
-    bool _validate = false;
 
     void login() async {
       FirebaseAuth auth = FirebaseAuth.instance;
