@@ -36,8 +36,11 @@ class _HomeState extends State<Home> {
       try {
         String title = titleController.text;
         String description = descriptionController.text;
+
+        String imageName = path.basename(imagePath);
+
         firebase_storage.Reference ref =
-            firebase_storage.FirebaseStorage.instance.ref('/');
+            firebase_storage.FirebaseStorage.instance.ref('/$imageName');
 
         File file = File(imagePath);
         await ref.putFile(file);
@@ -49,6 +52,8 @@ class _HomeState extends State<Home> {
           "url": donwnloadUrl,
         });
         print("Post uploaded successfully");
+        titleController.clear();
+        descriptionController.clear();
       } catch (e) {
         print(e.message);
       }
