@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 // import 'package:flutterfirebase/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutterfirebase/editPost.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -105,6 +106,30 @@ class _HomeState extends State<Home> {
                           children: snapshot.data.docs
                               .map((DocumentSnapshot document) {
                             Map data = document.data();
+                            String id = document.id;
+                            data["id"] = id;
+
+                            void deletePost() async {
+                              try {
+                                FirebaseFirestore db =
+                                    FirebaseFirestore.instance;
+                                await db
+                                    .collection("posts")
+                                    .doc(data["id"])
+                                    .delete();
+                              } catch (e) {
+                                print(e.message);
+                              }
+                            }
+
+                            void editPost() {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return EditPost(data: data);
+                                  });
+                            }
+
                             return SingleChildScrollView(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -119,7 +144,13 @@ class _HomeState extends State<Home> {
                                       width: 150,
                                     ),
                                     Text(data["title"] ?? ''),
-                                    Text(data["description"] ?? '')
+                                    Text(data["description"] ?? ''),
+                                    ElevatedButton(
+                                        onPressed: editPost,
+                                        child: Text("Edit")),
+                                    ElevatedButton(
+                                        onPressed: deletePost,
+                                        child: Text("Delete")),
                                   ],
                                 ),
                               ),
